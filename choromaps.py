@@ -3,21 +3,45 @@ Python script that creates Choropleth Maps based on a CSV file
 
 Simply a sandbox to experiment with plotly :) 
 '''
+from pickle import FALSE
 from urllib.request import urlopen  # To Manipulate Urls
 import json                         # To Manipulate Json
 import pandas as pd                 # For data frame creation 
 import plotly.express as px         # For Choropleth Map Creation 
+import os                           # For checking file integrity
+import sys                          # For command line arguments
 
+# Name of the data to extract in the CSV file (so the column name) 
+map_locs_name   = "departement"
+
+### Parse input arguments (if any) ###
+if len(sys.argv) > 2:
+    CSV_DATA_PATH   = str(sys.argv[1])
+
+    # Safety Check 
+    if(os.path.exists(CSV_DATA_PATH) == False):
+        print("Invalid file ! Exiting application...")
+        exit()
+
+    map_data_name   = str(sys.argv[2])
+
+    print("Processing file \"{}\" and using column \"{}\" as a data for the Choropleth Map".format(CSV_DATA_PATH,map_data_name))
+
+elif len(sys.argv) == 1:
+    # No Arguments were provided, using default file
+    CSV_DATA_PATH   = "ressources/vaches.csv"
+    map_data_name   = "vaches"      
+    print("Processing file \"{}\" and using column \"{}\" as a data for the Choropleth Map".format(CSV_DATA_PATH,map_data_name))
+else:
+    # Invalid Number of Arguments 
+    print("Usage should be :")
+    print("choromaps.py csv_file_name.csv column_of_interest")
+    print("Example : choromaps.py ressources/vaches.csv vaches")
 
 ### Declarations ###
 
 # URL for the Json description of the French Departements 
 URL_GEOJSON_FR  = 'https://france-geojson.gregoiredavid.fr/repo/departements.geojson'
-
-# CSV Data
-CSV_FOLDER      = "ressources/"
-CSV_DATA        = "vaches.csv"
-CSV_DATA_PATH   = "{}{}".format(CSV_FOLDER,CSV_DATA)
 
 # Plotly Constants
 
@@ -27,11 +51,6 @@ PLTLY_FIK       = "properties.nom"  # Feature ID Key for Plotly, basically the p
 
 # Constants
 DEBUG           = 0
-
-# Name of the data to extract in the CSV file (so the column name) 
-map_locs_name   = "departement"
-map_data_name   = "vaches"
-
 
 ### Read the geojson data with France's borders ###
 with urlopen(URL_GEOJSON_FR) as response:
